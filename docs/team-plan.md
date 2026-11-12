@@ -405,7 +405,7 @@ git log --author="你的邮箱" --since="2026-10-08" --oneline
 ### Step 3（第 2～3 天）：搭脚手架
 
 ```bash
-git clone https://gitee.com/mouliu1022/campus-mesh.git
+git clone https://github.com/3119869706-crypto/group-08-campus-mesh.git
 cd campus-mesh
 git switch -c feature/1-init-scaffold
 pnpm create vite apps/web --template vue-ts

@@ -35,7 +35,7 @@ CampusMesh 是一个面向校园场景的轻量 Web 应用。它把四件事放�
 ### 启动步骤
 
 ```bash
-git clone https://gitee.com/mouliu1022/campus-mesh.git
+git clone https://github.com/3119869706-crypto/group-08-campus-mesh.git
 cd campus-mesh
 pnpm install
 cp .env.example .env        # 填写数据库与 LLM 配置
