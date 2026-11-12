@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect project
+        id: detect
+        run: |
+          if [ -f package.json ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::package.json 尚未创建（Issue #1），本次跳过构建与测试。"
+          fi
+
+      - name: Setup pnpm
+        if: steps.detect.outputs.ready == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        if: steps.detect.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        if: steps.detect.outputs.ready == 'true'
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          else
+            pnpm install --no-frozen-lockfile
+          fi
+
+      - name: Lint
+        if: steps.detect.outputs.ready == 'true'
+        run: pnpm lint
+
+      - name: Typecheck
+        if: steps.detect.outputs.ready == 'true'
+        run: pnpm typecheck
+
+      - name: Test
+        if: steps.detect.outputs.ready == 'true'
+        run: pnpm test:cov
+
+      - name: Build
+        if: steps.detect.outputs.ready == 'true'
+        run: pnpm build
