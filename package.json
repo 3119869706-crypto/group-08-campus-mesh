@@ -1,0 +1,24 @@
+{
+  "name": "campusmesh",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @campusmesh/server --filter @campusmesh/web dev",
+    "build": "pnpm --filter @campusmesh/server build && pnpm --filter @campusmesh/web build",
+    "lint": "eslint . --ext .ts,.vue",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @campusmesh/server test",
+    "test:cov": "pnpm --filter @campusmesh/server test:cov",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-vue": "^9.32.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "vue-eslint-parser": "^9.4.3"
+  }
+}
