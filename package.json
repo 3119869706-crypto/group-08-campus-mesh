@@ -8,8 +8,8 @@
     "build": "pnpm --filter @campusmesh/server build && pnpm --filter @campusmesh/web build",
     "lint": "eslint . --ext .ts,.vue",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter @campusmesh/server test",
-    "test:cov": "pnpm --filter @campusmesh/server test:cov",
+    "test": "pnpm --filter @campusmesh/server test && pnpm --filter @campusmesh/web test",
+    "test:cov": "pnpm --filter @campusmesh/server test:cov && pnpm --filter @campusmesh/web test",
     "format": "prettier --write ."
   },
   "devDependencies": {

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import type { AnonymousIdentity } from '@campusmesh/shared'
-import { createIdentity, getHealth } from '../api'
+import { getHealth } from '../api'
+import { ensureIdentity, loadIdentity, resetIdentity } from '../identity'
 
 const health = ref<'checking' | 'ok' | 'down'>('checking')
 const identity = ref<AnonymousIdentity | null>(null)
@@ -15,6 +16,18 @@ const posts = [
 ]
 
 onMounted(async () => {
+  identity.value = loadIdentity()
+  if (!identity.value) {
+    creating.value = true
+    try {
+      identity.value = await ensureIdentity()
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '创建匿名身份失败'
+    } finally {
+      creating.value = false
+    }
+  }
+
   try {
     await getHealth()
     health.value = 'ok'
@@ -23,13 +36,15 @@ onMounted(async () => {
   }
 })
 
-async function handleCreateIdentity() {
+async function handleReset() {
+  if (!window.confirm('重置后旧身份和本地记录将无法恢复，确定继续？')) return
   creating.value = true
   error.value = ''
   try {
-    identity.value = await createIdentity()
+    identity.value = await resetIdentity()
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '创建匿名身份失败'
+    identity.value = null
+    error.value = e instanceof Error ? e.message : '重置匿名身份失败'
   } finally {
     creating.value = false
   }
@@ -47,17 +62,21 @@ async function handleCreateIdentity() {
         </span>
       </p>
 
-      <div v-if="!identity" class="identity-box">
-        <p class="muted">首次使用先创建一个匿名身份，不需要手机号或学号。</p>
-        <button class="btn" :disabled="creating" @click="handleCreateIdentity">
-          {{ creating ? '创建中…' : '创建匿名身份' }}
-        </button>
-        <p v-if="error" class="error">{{ error }}</p>
-      </div>
+      <div class="identity-box">
+        <p v-if="creating && !identity" class="muted">正在创建匿名身份…</p>
 
-      <div v-else class="identity-box">
-        <p class="muted">当前身份</p>
-        <p><strong>{{ identity.nickname }}</strong>（{{ identity.anonId }}）</p>
+        <template v-else-if="identity">
+          <p class="muted">当前身份（已保存在浏览器本地）</p>
+          <p><strong>{{ identity.nickname }}</strong>（{{ identity.anonId }}）</p>
+          <button class="btn ghost" :disabled="creating" @click="handleReset">重置身份</button>
+          <p v-if="error" class="error">{{ error }}</p>
+        </template>
+
+        <template v-else>
+          <p class="muted">匿名身份创建失败，请确认服务端已启动。</p>
+          <button class="btn" @click="handleReset">重试</button>
+          <p v-if="error" class="error">{{ error }}</p>
+        </template>
       </div>
     </div>
 
@@ -76,6 +95,12 @@ async function handleCreateIdentity() {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px dashed var(--border);
+}
+.btn.ghost {
+  margin-top: 8px;
+  background: #fff;
+  color: var(--blue);
+  border: 1px solid var(--blue);
 }
 .post h3 {
   margin: 4px 0 8px;
