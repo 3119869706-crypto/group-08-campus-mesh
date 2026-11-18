@@ -17,12 +17,12 @@ CampusMesh 是一个面向校园场景的轻量 Web 应用。它把四件事放�
 
 | 层 | 技术 |
 |---|---|
-| 前端 | Vue 3 · Vite · TypeScript · Pinia · Vue Router |
-| 服务端 | Node.js 20/22 · Fastify（或 Express）· WebSocket |
+| 前端 | Vue 3 · Vite · TypeScript · Vue Router |
+| 服务端 | Node.js 20/22 · Fastify · WebSocket |
 | 通信 | WebRTC DataChannel · STUN/TURN（coturn） |
 | AI | OpenAI 兼容接口 · SSE 流式输出 |
 | 数据 | SQLite（开发）/ MySQL 8（部署）· IndexedDB（本地） |
-| 工程 | pnpm workspace · ESLint · Prettier · Vitest · GitHub Actions / Gitee Go |
+| 工程 | pnpm workspace · ESLint · Prettier · Vitest · GitHub Actions |
 
 ## 快速开始
 
@@ -36,9 +36,9 @@ CampusMesh 是一个面向校园场景的轻量 Web 应用。它把四件事放�
 
 ```bash
 git clone https://github.com/3119869706-crypto/group-08-campus-mesh.git
-cd campus-mesh
+cd group-08-campus-mesh
 pnpm install
-cp .env.example .env        # 填写数据库与 LLM 配置
+cp .env.example .env        # 可选：按需填写端口与 LLM 配置
 pnpm dev                    # 同时启动前端与服务端
 ```
 
@@ -47,6 +47,18 @@ pnpm dev                    # 同时启动前端与服务端
 - 健康检查：http://localhost:3000/api/v1/health
 
 > 没有 LLM Key 也能启动：私聊、校园墙、二课列表可用，AI 功能会提示“AI 暂不可用”。
+
+### Docker 启动（可选）
+
+```bash
+docker compose up --build
+```
+
+- 前端：http://localhost:8080
+- 服务端：http://localhost:3000
+- 首次构建会下载依赖，约 2～5 分钟
+
+更多说明见 [docs/deployment.md](docs/deployment.md)。
 
 ### 常用命令
 
@@ -68,9 +80,10 @@ campusmesh/
 ├── packages/
 │   └── shared/              # 前后端共用类型与工具
 ├── docs/                    # 架构、接口、ADR、会议纪要
-├── tests/                   # 单元 / 接口 / E2E
-├── .github/                 # Issue / PR 模板与 CI
-└── docker/                  # 部署脚本（可选）
+├── deploy/                  # nginx 配置
+├── Dockerfile               # 服务端 / 前端镜像
+├── docker-compose.yml       # 一键启动
+└── .github/                 # Issue / PR 模板与 CI
 ```
 
 ## 团队与分工
@@ -86,6 +99,7 @@ campusmesh/
 
 - [x] 需求分析与 SRS V1.0
 - [x] 架构与接口设计
+- [x] 工程脚手架与 CI（PR #19）
 - [ ] v0.1.0 Alpha：匿名身份 + 校园墙 MVP + 1v1 私聊 + AI 对话
 - [ ] v0.2.0 Beta：评论互动 + AI 人设/技能 + 二课工具 + 覆盖率 ≥40%
 - [ ] v1.0.0 Final：安全与性能加固 + 文档 + 答辩
