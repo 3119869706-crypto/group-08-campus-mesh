@@ -28,6 +28,7 @@ jobs:
           gh label create test --color 548235 --force
           gh label create docs --color 7F7F7F --force
           gh label create chore --color BFBFBF --force
+          gh label create ci --color 6E7781 --force
           gh label create frontend --color 2E75B6 --force
           gh label create backend --color 2E75B6 --force
           gh label create ai --color C55A11 --force
