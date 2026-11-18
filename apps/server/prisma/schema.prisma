@@ -1,0 +1,139 @@
+// CampusMesh 数据模型（开发期 SQLite，部署期 MySQL 8）
+// 字段口径见 SRS 表 22~26；差异隔离说明见 docs/db.md。
+// 注意：SQLite 连接器不支持 enum，所有枚举字段用 String 存储，取值由 zod 在应用层校验。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 匿名用户：不含任何实名信息
+model User {
+  anonId       String    @id
+  nickname     String
+  avatarSeed   String
+  tokenVersion Int       @default(1)
+  createdAt    DateTime  @default(now())
+  lastSeenAt   DateTime?
+
+  posts     WallPost[]
+  comments  Comment[]
+  likes     Like[]
+  reports   Report[]
+  summaries Summary[]
+}
+
+/// 校园墙帖子：软删除，热度每小时重算
+model WallPost {
+  id           Int      @id @default(autoincrement())
+  authorId     String
+  category     String
+  content      String
+  images       String   @default("[]") // JSON 数组文本，如 ["https://..."]
+  likeCount    Int      @default(0)
+  commentCount Int      @default(0)
+  hotScore     Float    @default(0)
+  status       String   @default("normal") // normal | hidden | deleted
+  createdAt    DateTime @default(now())
+
+  author   User      @relation(fields: [authorId], references: [anonId])
+  comments Comment[]
+  likes    Like[]
+  reports  Report[]
+
+  @@index([status, createdAt])
+  @@index([status, hotScore])
+}
+
+/// 评论与一级回复
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  authorId  String
+  parentId  Int? // 为空表示一级评论；不加自关联，层级仅两层
+  content   String
+  status    String   @default("normal")
+  createdAt DateTime @default(now())
+
+  post   WallPost @relation(fields: [postId], references: [id])
+  author User     @relation(fields: [authorId], references: [anonId])
+
+  @@index([postId, createdAt])
+}
+
+/// 点赞：联合主键保证幂等
+model Like {
+  postId    Int
+  userId    String
+  createdAt DateTime @default(now())
+
+  post WallPost @relation(fields: [postId], references: [id])
+  user User     @relation(fields: [userId], references: [anonId])
+
+  @@id([postId, userId])
+}
+
+/// 举报：同一用户对同一目标 24 小时内仅计一次（由应用层判定）
+model Report {
+  id         Int      @id @default(autoincrement())
+  targetType String // post | comment
+  targetId   Int
+  reporterId String
+  reason     String
+  status     String   @default("pending") // pending | accepted | rejected
+  handledBy  String?
+  createdAt  DateTime @default(now())
+
+  reporter   User      @relation(fields: [reporterId], references: [anonId])
+  wallPost   WallPost? @relation(fields: [wallPostId], references: [id])
+  wallPostId Int?
+
+  @@index([targetType, targetId, createdAt])
+}
+
+/// 二课活动：source_url 唯一（第一道去重），content_hash 建索引（第二道）
+model Activity {
+  id          Int       @id @default(autoincrement())
+  title       String
+  organizer   String?
+  startTime   DateTime
+  endTime     DateTime?
+  location    String?
+  credits     Float? // SQLite 无精确 DECIMAL，展示层保留 1 位小数
+  category    String?
+  description String?
+  sourceUrl   String    @unique
+  contentHash String
+  fetchedAt   DateTime  @default(now())
+
+  summaries Summary[]
+
+  @@index([startTime])
+  @@index([contentHash])
+  @@index([category, startTime])
+}
+
+/// 二课总结：默认仅本人可见
+model Summary {
+  id              Int      @id @default(autoincrement())
+  userId          String
+  activityId      Int
+  personaSnapshot String? // 生成时的人设快照，JSON 文本，便于复现
+  content         String   @default("")
+  style           String? // 正式 | 朴实 | 生动
+  wordCount       Int? // 500 | 800 | 1200
+  model           String?
+  visibility      String   @default("private") // private | public
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [anonId])
+  activity Activity @relation(fields: [activityId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([activityId])
+}
