@@ -158,7 +158,7 @@ function exportMarkdown() {
       <h4 class="section-label link">AI 生成总结（可编辑）</h4>
       <textarea v-model="draft" class="summary-box" :disabled="generating" placeholder="点击右侧“生成总结”后，这里会出现可编辑的总结内容。"></textarea>
       <p class="content-foot" :class="{ over: overLimit }">
-        字数：{{ count }} / {{ target }}　状态：{{ statusText }}
+        字数：{{ count }} / {{ target }} 状态：{{ statusText }}
         <span v-if="overLimit" class="warn">已超过目标字数</span>
       </p>
     </section>

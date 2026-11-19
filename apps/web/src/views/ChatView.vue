@@ -255,7 +255,7 @@ onUnmounted(() => {
         ></textarea>
         <button class="send-btn" :disabled="!input.trim()" @click="onSend">发送</button>
       </div>
-      <p class="input-foot" :class="{ over: input.length >= MAX_LEN }">{{ input.length }} / {{ MAX_LEN }}　Enter 发送 · Shift+Enter 换行</p>
+      <p class="input-foot" :class="{ over: input.length >= MAX_LEN }">{{ input.length }} / {{ MAX_LEN }}  Enter 发送 · Shift+Enter 换行</p>
     </section>
 
     <!-- 右：AI 助手 -->
