@@ -1,0 +1,24 @@
+name: Open pending PRs
+
+on:
+  push:
+    paths:
+      - "scripts/open-prs.sh"
+      - ".github/workflows/open-prs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: bash scripts/open-prs.sh
