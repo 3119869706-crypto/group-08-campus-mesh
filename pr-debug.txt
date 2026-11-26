@@ -1,0 +1,11 @@
+== auth ==
+github.com
+  ✓ Logged in to github.com account github-actions[bot] (GH_TOKEN)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: ghs_*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+== repo permission ==
+{"name":"group-08-campus-mesh","viewerPermission":""}
+== create ==
+pull request create failed: GraphQL: GitHub Actions is not permitted to create or approve pull requests (createPullRequest)
+exit=1
